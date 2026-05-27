@@ -10,11 +10,12 @@ import {
 import { FaBolt, FaCrown, FaStar } from "react-icons/fa";
 import { GiMuscleUp, GiSparkles } from "react-icons/gi";
 import { IoTimerOutline } from "react-icons/io5";
-import { LuClipboardList } from "react-icons/lu";
+import { LuClipboardList, LuKeyboard } from "react-icons/lu";
 
 const ITEM_ICONS: Record<string, IconType> = {
   ring: GiGemPendant,
   clover: GiClover,
+  spaceKey: LuKeyboard,
   gloves: GiGloves,
   hourglass: GiHourglass,
   rainbow: GiRainbowStar,

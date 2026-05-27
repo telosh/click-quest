@@ -11,6 +11,7 @@ export interface ItemDef {
   luckyMultBonus?: number;
   comboBonus?: number;
   bonusTimeExtendMs?: number;
+  spaceHold?: boolean;
 }
 
 export interface StageGrowth {

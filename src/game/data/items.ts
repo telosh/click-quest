@@ -16,6 +16,13 @@ export const ITEMS: ItemDef[] = [
     luckyBonus: 0.03,
   },
   {
+    id: "spaceKey",
+    name: "スペースキー固定器",
+    description: "Space 長押しで自動クリック（短押しは1回）",
+    minStage: 2,
+    spaceHold: true,
+  },
+  {
     id: "gloves",
     name: "連打グローブ",
     description: "連続クリックで最大 +20% Power",
