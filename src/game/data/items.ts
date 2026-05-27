@@ -16,6 +16,20 @@ export const ITEMS: ItemDef[] = [
     luckyBonus: 0.03,
   },
   {
+    id: "pocketWatch",
+    name: "懐中時計",
+    description: "毎秒 +1 クリック（自動）",
+    minStage: 3,
+    passiveCps: 1,
+  },
+  {
+    id: "helper",
+    name: "見習いクリッカー",
+    description: "毎秒 +3 クリック（自動）",
+    minStage: 5,
+    passiveCps: 3,
+  },
+  {
     id: "spaceKey",
     name: "スペースキー固定器",
     description: "Space 長押しで自動クリック（短押しは1回）",
@@ -37,6 +51,13 @@ export const ITEMS: ItemDef[] = [
     bonusTimeExtendMs: 10_000,
   },
   {
+    id: "farm",
+    name: "クリック農場",
+    description: "毎秒 +8 クリック（自動）",
+    minStage: 9,
+    passiveCps: 8,
+  },
+  {
     id: "rainbow",
     name: "虹の石",
     description: "ラッキー倍率 ×1.5",
@@ -56,6 +77,13 @@ export const ITEMS: ItemDef[] = [
     description: "Lucky Chance +5%",
     minStage: 14,
     luckyBonus: 0.05,
+  },
+  {
+    id: "factory",
+    name: "自動工場",
+    description: "毎秒 +20 クリック（自動）",
+    minStage: 15,
+    passiveCps: 20,
   },
 ];
 

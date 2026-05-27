@@ -61,12 +61,16 @@ export const LUCKY_UP_BY_RANK: Record<RewardRank, { variant: string; lucky: numb
 export const ITEM_RANK: Record<string, RewardRank> = {
   ring: "B",
   clover: "B",
+  pocketWatch: "C",
+  helper: "B",
   spaceKey: "A",
   gloves: "A",
   hourglass: "A",
+  farm: "A",
   crown: "S",
   rainbow: "S",
   star: "A",
+  factory: "S",
 };
 
 export const REWARD_KIND_LABEL: Record<RewardKind, string> = {
