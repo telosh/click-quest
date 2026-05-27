@@ -1,19 +1,40 @@
 export type RewardKind = "item" | "bonusTime" | "instantBoost" | "powerUp" | "luckyUp";
 export type RewardRank = "C" | "B" | "A" | "S";
 
+/** アイテムの成長方針（UI表示・バランス分類用） */
+export type ItemCategory =
+  | "power"
+  | "lucky"
+  | "passive"
+  | "combo"
+  | "bonus"
+  | "input"
+  | "hybrid";
+
 export interface ItemDef {
   id: string;
   name: string;
   description: string;
   minStage: number;
+  category: ItemCategory;
   powerMult?: number;
   luckyBonus?: number;
   luckyMultBonus?: number;
   comboBonus?: number;
+  /** コンボ継続ウィンドウの延長（ms） */
+  comboWindowExtendMs?: number;
   bonusTimeExtendMs?: number;
+  /** ボーナスタイム中の倍率加算（例: 0.35 → ×0.35 追加） */
+  bonusTimeMultBonus?: number;
   spaceHold?: boolean;
+  /** 長押しで自動タップ（スマホ向け） */
+  touchHold?: boolean;
   /** 毎秒の自動クリック数 */
   passiveCps?: number;
+  /** パッシブが Power の何割を毎秒加算するか */
+  passivePowerScale?: number;
+  /** ステージごとにパッシブ +N（floor(stageIndex * N)） */
+  passiveStageBonus?: number;
 }
 
 export interface StageGrowth {

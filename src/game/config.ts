@@ -24,6 +24,8 @@ export const COMFORT_MESSAGE_MAX_MS = 90_000;
 export const SPACE_CLICK_COOLDOWN_MS = 350;
 export const SPACE_HOLD_DELAY_MS = 350;
 export const SPACE_HOLD_INTERVAL_MS = 120;
+export const TOUCH_HOLD_DELAY_MS = 280;
+export const TOUCH_HOLD_INTERVAL_MS = 120;
 
 /** 連打・オートクリック対策: 1秒あたりの処理上限 */
 export const MAX_CLICKS_PER_SECOND = 28;
