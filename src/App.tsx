@@ -11,8 +11,9 @@ import { StageFlash } from "./components/StageFlash";
 import { StageRewardSheet } from "./components/StageRewardSheet";
 import { StartupHint } from "./components/StartupHint";
 import { StatsOverlay } from "./components/StatsOverlay";
-import { isCleared, hasSpaceHoldItem } from "./game/engine/click";
+import { getPassiveCps, hasSpaceHoldEquipped } from "./game/engine/click";
 import { getCurrentRewardStage, getRewardChoices, useGameStore } from "./game/store";
+import type { GameState } from "./game/types";
 import { useComfortMoments } from "./hooks/useComfortMoments";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useGlobalClick } from "./hooks/useGlobalClick";
@@ -26,7 +27,16 @@ export default function App() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
-  const state = useGameStore((s) => s.state);
+  const totalClicks = useGameStore((s) => s.state.totalClicks);
+  const pendingRewardQueue = useGameStore((s) => s.state.pendingRewardQueue);
+  const power = useGameStore((s) => s.state.power);
+  const luckyChance = useGameStore((s) => s.state.luckyChance);
+  const stageIndex = useGameStore((s) => s.state.stageIndex);
+  const cleared = useGameStore((s) => s.state.cleared);
+  const bonusTimeRemainingMs = useGameStore((s) => s.state.bonusTimeRemainingMs);
+  const bonusTimeMultiplier = useGameStore((s) => s.state.bonusTimeMultiplier);
+  const equippedItemIds = useGameStore((s) => s.state.equippedItemIds);
+  const passiveCps = useGameStore((s) => getPassiveCps(s.state));
   const toast = useGameStore((s) => s.toast);
   const pops = useGameStore((s) => s.pops);
   const personalBest = useGameStore((s) => s.personalBest);
@@ -42,16 +52,30 @@ export default function App() {
   const removePop = useGameStore((s) => s.removePop);
   const touchActivity = useGameStore((s) => s.touchActivity);
 
-  const displayClicks = useThrottledValue(state.totalClicks);
-  const rewardStage = getCurrentRewardStage(state);
-  const rewardChoices = getRewardChoices(state);
+  const displayClicks = useThrottledValue(totalClicks);
+  const rewardStage = getCurrentRewardStage({ pendingRewardQueue } as GameState);
+  const rewardChoices = getRewardChoices({ pendingRewardQueue } as GameState);
   const isUiIdle = useIdleUi(lastActivityAt);
   const triggerCenterClick = useClickButtonCenter();
 
-  const cleared = isCleared(state);
   const hasPendingRewards = rewardChoices.length > 0;
-  const showStartupHint = !sessionStarted && !cleared && state.totalClicks === 0;
-  const spaceHoldEquipped = hasSpaceHoldItem(state);
+  const showStartupHint = !sessionStarted && !cleared && totalClicks === 0;
+  const spaceHoldEquipped = hasSpaceHoldEquipped(equippedItemIds);
+  const statsState: GameState = {
+    saveVersion: 0,
+    totalClicks,
+    stageIndex,
+    power,
+    luckyChance,
+    equippedItemIds,
+    bonusTimeRemainingMs,
+    bonusTimeMultiplier,
+    pendingRewardQueue,
+    cleared,
+    lastClickAt: 0,
+    comboStreak: 0,
+    passiveAccumulatorMs: 0,
+  };
   const keyboardMode = cleared
     ? "cleared"
     : showStartupHint
@@ -64,7 +88,7 @@ export default function App() {
   }, [touchActivity, triggerCenterClick]);
 
   const comfort = useComfortMoments({
-    totalClicks: state.totalClicks,
+    totalClicks,
     active: sessionStarted && !cleared,
   });
 
@@ -175,7 +199,7 @@ export default function App() {
         </a>
         <main id="main-content" ref={mainRef} className="app cleared" tabIndex={-1}>
           <ClearScreen
-            totalClicks={state.totalClicks}
+            totalClicks={totalClicks}
             personalBest={personalBest}
             onRestart={handleRestart}
           />
@@ -200,13 +224,14 @@ export default function App() {
           <div className="hud-main">
             <ProgressBar
               totalClicks={displayClicks}
-              stageIndex={state.stageIndex}
+              stageIndex={stageIndex}
               personalBest={personalBest}
+              passiveCps={passiveCps}
             />
             <div className="bonus-banner-slot">
               <BonusTimeBanner
-                remainingMs={state.bonusTimeRemainingMs}
-                multiplier={state.bonusTimeMultiplier}
+                remainingMs={bonusTimeRemainingMs}
+                multiplier={bonusTimeMultiplier}
               />
             </div>
           </div>
@@ -214,7 +239,7 @@ export default function App() {
 
         <StatsOverlay
           open={statsOpen}
-          state={state}
+          state={statsState}
           dimmed={!isUiIdle}
           onToggle={() => setStatsOpen((v) => !v)}
           onExport={handleExport}

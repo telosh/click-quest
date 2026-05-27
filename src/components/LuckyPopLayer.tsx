@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { PopEvent } from "../game/types";
 
@@ -6,7 +7,10 @@ interface LuckyPopLayerProps {
   onRemove: (id: number) => void;
 }
 
-export function LuckyPopLayer({ pops, onRemove }: LuckyPopLayerProps) {
+export const LuckyPopLayer = memo(function LuckyPopLayer({
+  pops,
+  onRemove,
+}: LuckyPopLayerProps) {
   return (
     <div className="pop-layer" aria-hidden="true">
       <AnimatePresence>
@@ -27,4 +31,4 @@ export function LuckyPopLayer({ pops, onRemove }: LuckyPopLayerProps) {
       </AnimatePresence>
     </div>
   );
-}
+});

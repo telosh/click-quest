@@ -2,7 +2,6 @@ import { useCallback, useRef } from "react";
 import { motion } from "motion/react";
 import { LuMousePointerClick } from "react-icons/lu";
 import { useGameStore } from "../game/store";
-import { isInputBlocked } from "../game/engine/click";
 
 interface ClickButtonProps {
   disabled?: boolean;
@@ -11,7 +10,7 @@ interface ClickButtonProps {
 
 export function ClickButton({ disabled, onActivate }: ClickButtonProps) {
   const click = useGameStore((s) => s.click);
-  const blocked = useGameStore((s) => isInputBlocked(s.state));
+  const blocked = useGameStore((s) => s.state.cleared);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const fireClick = useCallback(
@@ -62,7 +61,7 @@ export function ClickButton({ disabled, onActivate }: ClickButtonProps) {
 
 export function useClickButtonCenter(): () => void {
   const click = useGameStore((s) => s.click);
-  const blocked = useGameStore((s) => isInputBlocked(s.state));
+  const blocked = useGameStore((s) => s.state.cleared);
 
   return useCallback(() => {
     if (blocked) return;
