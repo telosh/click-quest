@@ -88,12 +88,30 @@ export function isBonusActive(state: GameState): boolean {
   return state.bonusTimeRemainingMs > 0;
 }
 
+export function getComboWindowMs(equippedItemIds: string[]): number {
+  let extend = 0;
+  for (const id of equippedItemIds) {
+    extend += getItem(id)?.comboWindowExtendMs ?? 0;
+  }
+  return COMBO_WINDOW_MS + extend;
+}
+
+export function getBonusTimeMultBonus(equippedItemIds: string[]): number {
+  let bonus = 0;
+  for (const id of equippedItemIds) {
+    bonus += getItem(id)?.bonusTimeMultBonus ?? 0;
+  }
+  return bonus;
+}
+
 export function getBonusMultiplier(state: GameState): number {
-  return isBonusActive(state) ? state.bonusTimeMultiplier : 1;
+  if (!isBonusActive(state)) return 1;
+  return state.bonusTimeMultiplier + getBonusTimeMultBonus(state.equippedItemIds);
 }
 
 export function updateCombo(state: GameState, now: number): GameState {
-  if (state.lastClickAt > 0 && now - state.lastClickAt <= COMBO_WINDOW_MS) {
+  const windowMs = getComboWindowMs(state.equippedItemIds);
+  if (state.lastClickAt > 0 && now - state.lastClickAt <= windowMs) {
     return { ...state, comboStreak: Math.min(state.comboStreak + 1, 20), lastClickAt: now };
   }
   return { ...state, comboStreak: 1, lastClickAt: now };
@@ -162,13 +180,28 @@ export function hasSpaceHoldEquipped(equippedItemIds: string[]): boolean {
   return equippedItemIds.some((id) => getItem(id)?.spaceHold === true);
 }
 
+export function hasTouchHoldEquipped(equippedItemIds: string[]): boolean {
+  return equippedItemIds.some((id) => getItem(id)?.touchHold === true);
+}
+
 export function getPassiveCps(state: GameState): number {
-  let cps = 0;
+  let base = 0;
+  let powerScale = 0;
+  let stageBonus = 0;
+
   for (const id of state.equippedItemIds) {
-    cps += getItem(id)?.passiveCps ?? 0;
+    const item = getItem(id);
+    base += item?.passiveCps ?? 0;
+    powerScale += item?.passivePowerScale ?? 0;
+    stageBonus += item?.passiveStageBonus ?? 0;
   }
-  if (cps <= 0) return 0;
-  return Math.max(1, Math.floor(cps * getBonusMultiplier(state)));
+
+  const scaledPower = powerScale > 0 ? Math.floor(getEffectivePower(state) * powerScale) : 0;
+  const scaledStage = stageBonus > 0 ? Math.floor(state.stageIndex * stageBonus) : 0;
+  const total = base + scaledPower + scaledStage;
+
+  if (total <= 0) return 0;
+  return Math.max(1, Math.floor(total * getBonusMultiplier(state)));
 }
 
 export function needsGameLoop(state: GameState): boolean {
