@@ -3,6 +3,8 @@ import type { GameState, RewardChoice } from "../types";
 import { getStageIndex } from "../data/stages";
 import { createInitialState } from "./click";
 
+const TIMESTAMP_SUFFIX = ":ts";
+
 function isValidRewardChoice(value: unknown): value is RewardChoice {
   if (!value || typeof value !== "object") return false;
   const reward = value as Partial<RewardChoice>;
@@ -36,6 +38,7 @@ export function serializeSave(state: GameState): string {
     cleared: state.cleared,
     lastClickAt: 0,
     comboStreak: 0,
+    passiveAccumulatorMs: state.passiveAccumulatorMs,
     pendingRewardQueue: state.pendingRewardQueue,
   };
   return JSON.stringify(payload, null, 2);
@@ -60,12 +63,20 @@ export function parseSave(raw: string): GameState | null {
       bonusTimeMultiplier: data.bonusTimeMultiplier ?? base.bonusTimeMultiplier,
       cleared: Boolean(data.cleared),
       pendingRewardQueue: sanitizeRewardQueue(data.pendingRewardQueue),
+      passiveAccumulatorMs: data.passiveAccumulatorMs ?? 0,
       lastClickAt: 0,
       comboStreak: 0,
     };
   } catch {
     return null;
   }
+}
+
+export function readSaveTimestamp(key: string): number | null {
+  const raw = localStorage.getItem(key + TIMESTAMP_SUFFIX);
+  if (!raw) return null;
+  const ts = Number(raw);
+  return Number.isFinite(ts) ? ts : null;
 }
 
 export function loadSaveFromStorage(key: string): GameState | null {
@@ -76,4 +87,5 @@ export function loadSaveFromStorage(key: string): GameState | null {
 
 export function writeSaveToStorage(key: string, state: GameState): void {
   localStorage.setItem(key, serializeSave(state));
+  localStorage.setItem(key + TIMESTAMP_SUFFIX, String(Date.now()));
 }
