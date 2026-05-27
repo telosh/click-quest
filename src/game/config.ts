@@ -21,6 +21,7 @@ export const COMFORT_UNLOCK_CLICKS = 1_000;
 export const COMFORT_MESSAGE_MIN_MS = 45_000;
 export const COMFORT_MESSAGE_MAX_MS = 90_000;
 
+export const SPACE_CLICK_COOLDOWN_MS = 350;
 export const SPACE_HOLD_DELAY_MS = 350;
 export const SPACE_HOLD_INTERVAL_MS = 90;
 

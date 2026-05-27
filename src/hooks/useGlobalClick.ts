@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { SPACE_CLICK_COOLDOWN_MS } from "../game/config";
 
 interface GlobalClickOptions {
   enabled: boolean;
@@ -15,6 +16,8 @@ export function useGlobalClick({
   onRestart,
   mode,
 }: GlobalClickOptions) {
+  const lastSpaceClickAtRef = useRef(0);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -47,6 +50,10 @@ export function useGlobalClick({
 
       if (mode === "blocked") return;
 
+      const now = Date.now();
+      if (now - lastSpaceClickAtRef.current < SPACE_CLICK_COOLDOWN_MS) return;
+
+      lastSpaceClickAtRef.current = now;
       onClick();
     };
 
