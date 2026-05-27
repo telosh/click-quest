@@ -149,5 +149,9 @@ export function isCleared(state: GameState): boolean {
 }
 
 export function isInputBlocked(state: GameState): boolean {
-  return state.pendingRewardQueue.length > 0 || isCleared(state);
+  return isCleared(state);
+}
+
+export function hasSpaceHoldItem(state: GameState): boolean {
+  return state.equippedItemIds.some((id) => getItem(id)?.spaceHold === true);
 }

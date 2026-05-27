@@ -43,7 +43,7 @@ export function performClick(state: GameState, now = Date.now()): {
   gain: number;
   isLucky: boolean;
 } {
-  if (state.pendingRewardQueue.length > 0 || isCleared(state)) {
+  if (isCleared(state)) {
     return { state, gain: 0, isLucky: false };
   }
 
