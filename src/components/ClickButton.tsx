@@ -32,7 +32,8 @@ export function ClickButton({ disabled, onActivate }: ClickButtonProps) {
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (event.code !== "Space" && event.code !== "Enter") return;
+      if (event.code === "Space") return;
+      if (event.code !== "Enter") return;
       event.preventDefault();
       const rect = event.currentTarget.getBoundingClientRect();
       fireClick(rect.left + rect.width / 2, rect.top + rect.height / 2);
