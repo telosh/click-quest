@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { ComfortCorner } from "./components/ComfortCorner";
 import { BonusTimeBanner } from "./components/BonusTimeBanner";
 import { ClearScreen } from "./components/ClearScreen";
 import { ClickButton, useClickButtonCenter } from "./components/ClickButton";
@@ -7,18 +8,21 @@ import { IdleIllustration } from "./components/illustrations/SceneIllustrations"
 import { LuckyPopLayer } from "./components/LuckyPopLayer";
 import { ProgressBar } from "./components/ProgressBar";
 import { StageFlash } from "./components/StageFlash";
-import { StageRewardModal } from "./components/StageRewardModal";
+import { StageRewardSheet } from "./components/StageRewardSheet";
 import { StartupHint } from "./components/StartupHint";
 import { StatsOverlay } from "./components/StatsOverlay";
-import { isCleared } from "./game/engine/click";
+import { isCleared, hasSpaceHoldItem } from "./game/engine/click";
 import { getCurrentRewardStage, getRewardChoices, useGameStore } from "./game/store";
+import { useComfortMoments } from "./hooks/useComfortMoments";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useGlobalClick } from "./hooks/useGlobalClick";
+import { useSpaceHoldClick } from "./hooks/useSpaceHoldClick";
 import { useIdleUi } from "./hooks/useIdleUi";
 import { useThrottledValue } from "./hooks/useThrottledDisplay";
 
 export default function App() {
   const [statsOpen, setStatsOpen] = useState(false);
+  const [rewardSheetOpen, setRewardSheetOpen] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -45,8 +49,30 @@ export default function App() {
   const triggerCenterClick = useClickButtonCenter();
 
   const cleared = isCleared(state);
-  const blocked = rewardChoices.length > 0;
+  const hasPendingRewards = rewardChoices.length > 0;
   const showStartupHint = !sessionStarted && !cleared && state.totalClicks === 0;
+  const spaceHoldEquipped = hasSpaceHoldItem(state);
+  const keyboardMode = cleared
+    ? "cleared"
+    : showStartupHint
+      ? "idle"
+      : "playing";
+
+  const handleKeyboardClick = useCallback(() => {
+    touchActivity();
+    triggerCenterClick();
+  }, [touchActivity, triggerCenterClick]);
+
+  const comfort = useComfortMoments({
+    totalClicks: state.totalClicks,
+    active: sessionStarted && !cleared,
+  });
+
+  useEffect(() => {
+    if (!hasPendingRewards) {
+      setRewardSheetOpen(false);
+    }
+  }, [hasPendingRewards]);
 
   useGameLoop();
 
@@ -64,17 +90,31 @@ export default function App() {
   }, [toast, clearToast]);
 
   useEffect(() => {
-    if (rewardChoices.length === 0) return;
+    if (!rewardSheetOpen || rewardChoices.length === 0) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Escape") {
+        setRewardSheetOpen(false);
+        return;
+      }
+
       const index = Number(event.key) - 1;
       if (index < 0 || index >= rewardChoices.length) return;
       selectReward(rewardChoices[index].id);
+      setRewardSheetOpen(false);
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [rewardChoices, selectReward]);
+  }, [rewardSheetOpen, rewardChoices, selectReward]);
+
+  const handleSelectReward = useCallback(
+    (rewardId: string) => {
+      selectReward(rewardId);
+      setRewardSheetOpen(false);
+    },
+    [selectReward],
+  );
 
   const handleStart = useCallback(() => {
     setSessionStarted(true);
@@ -94,12 +134,17 @@ export default function App() {
   }, [reset]);
 
   useGlobalClick({
-    enabled: true,
-    mode: cleared ? "cleared" : blocked ? "blocked" : showStartupHint ? "idle" : "playing",
-    onClick: () => {
-      touchActivity();
-      triggerCenterClick();
-    },
+    enabled: !spaceHoldEquipped,
+    mode: keyboardMode,
+    onClick: handleKeyboardClick,
+    onStart: handleStart,
+    onRestart: handleRestart,
+  });
+
+  useSpaceHoldClick({
+    enabled: spaceHoldEquipped,
+    mode: keyboardMode,
+    onClick: handleKeyboardClick,
     onStart: handleStart,
     onRestart: handleRestart,
   });
@@ -183,11 +228,19 @@ export default function App() {
           <ClickButton onActivate={handleActivate} />
         </div>
 
+        <ComfortCorner
+          visible={comfort.unlocked && sessionStarted}
+          message={comfort.message}
+          onDismissMessage={comfort.dismissMessage}
+        />
+
         {rewardStage !== null && (
-          <StageRewardModal
+          <StageRewardSheet
             stage={rewardStage}
             choices={rewardChoices}
-            onSelect={selectReward}
+            open={rewardSheetOpen}
+            onToggle={() => setRewardSheetOpen((open) => !open)}
+            onSelect={handleSelectReward}
           />
         )}
 

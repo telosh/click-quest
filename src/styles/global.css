@@ -115,7 +115,8 @@ a.skip-link:focus-visible {
 }
 
 .app.clicking .hud-main,
-.app.clicking .stats-sign {
+.app.clicking .stats-sign,
+.app.clicking .comfort-corner {
   opacity: 0.72;
   transition: opacity 0.2s ease;
 }
@@ -484,37 +485,96 @@ a.skip-link:focus-visible {
   font-size: 0.875rem;
 }
 
-.modal-backdrop {
+.reward-sheet-root {
   position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(2px);
-  display: grid;
-  place-items: center;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.reward-sheet-root > * {
+  pointer-events: auto;
+}
+
+.reward-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  border: 2px solid var(--text);
+  border-radius: 999px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.18);
+}
+
+.reward-tab.open {
+  background: #fff;
+  color: var(--text);
+}
+
+.reward-tab-icon,
+.reward-tab-chevron {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.reward-tab-chevron {
+  transition: transform 0.2s ease;
+}
+
+.reward-tab-chevron.open {
+  transform: rotate(180deg);
+}
+
+.reward-sheet-panel {
+  width: min(420px, calc(100vw - 2rem));
+  max-height: min(68dvh, 520px);
   padding: 1rem;
+  border: 2px solid var(--text);
+  border-radius: 16px 16px 4px 16px;
+  background: var(--bg);
+  box-shadow: 0 12px 40px rgba(17, 17, 17, 0.12);
+  overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-.modal {
-  width: min(720px, 100%);
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  box-shadow: var(--shadow);
+.reward-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.modal h2 {
+.reward-sheet-header h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   text-wrap: balance;
 }
 
-.modal-desc {
-  margin: 0.35rem 0 1rem;
+.reward-sheet-close {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  background: #f9fafb;
   color: var(--muted);
-  font-size: 0.875rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.reward-sheet-desc {
+  margin: 0.35rem 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .reward-grid {
@@ -525,6 +585,10 @@ a.skip-link:focus-visible {
 @media (min-width: 640px) {
   .reward-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .reward-sheet-panel .reward-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -713,6 +777,85 @@ a.skip-link:focus-visible {
 .clear-hint {
   margin: 0.75rem 0 0;
   font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.comfort-corner {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 15;
+  width: min(280px, calc(100vw - 2rem));
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #e9d5ff;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(250, 245, 255, 0.88));
+  box-shadow: 0 8px 24px rgba(147, 51, 234, 0.08);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+
+.comfort-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.comfort-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7c3aed;
+}
+
+.comfort-music-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #ddd6fe;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background: rgba(255, 255, 255, 0.85);
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.comfort-music-btn.on {
+  color: #7c3aed;
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+}
+
+.comfort-music-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.comfort-message {
+  display: block;
+  width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--text);
+  text-align: left;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.comfort-message:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.comfort-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.68rem;
   color: var(--muted);
 }
 
