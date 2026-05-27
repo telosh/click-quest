@@ -1,17 +1,24 @@
 import type { IconType } from "react-icons";
 import {
   GiClover,
+  GiGears,
+  GiDiceSixFacesFive,
+  GiElectric,
   GiFactory,
   GiFingerPrint,
   GiGemPendant,
   GiGloves,
   GiHourglass,
+  GiMegaphone,
   GiPerson,
   GiRainbowStar,
+  GiScrollUnfurled,
+  GiStoneBlock,
   GiWatch,
   GiWheat,
 } from "react-icons/gi";
 import { FaBolt, FaCrown, FaStar } from "react-icons/fa";
+import { TbMetronome } from "react-icons/tb";
 import { GiMuscleUp, GiSparkles } from "react-icons/gi";
 import { IoTimerOutline } from "react-icons/io5";
 import { LuClipboardList, LuKeyboard } from "react-icons/lu";
@@ -20,12 +27,19 @@ const ITEM_ICONS: Record<string, IconType> = {
   ring: GiGemPendant,
   clover: GiClover,
   pocketWatch: GiWatch,
+  tapStone: GiStoneBlock,
+  metronome: TbMetronome,
   helper: GiPerson,
+  dice: GiDiceSixFacesFive,
   spaceKey: LuKeyboard,
+  ancientMap: GiScrollUnfurled,
   gloves: GiGloves,
+  conveyor: GiGears,
   hourglass: GiHourglass,
   farm: GiWheat,
+  megaphone: GiMegaphone,
   rainbow: GiRainbowStar,
+  amplifier: GiElectric,
   crown: FaCrown,
   star: FaStar,
   factory: GiFactory,

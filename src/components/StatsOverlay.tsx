@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import { getItem } from "../game/data/items";
+import { getItem, ITEM_CATEGORY_LABEL } from "../game/data/items";
 import {
+  getComboWindowMs,
   getEffectiveLuckyChance,
   getEffectivePower,
   getPassiveCps,
@@ -33,6 +34,7 @@ export function StatsOverlay({
   const power = getEffectivePower(state);
   const lucky = getEffectiveLuckyChance(state);
   const passiveCps = getPassiveCps(state);
+  const comboWindowMs = getComboWindowMs(state.equippedItemIds);
   const trapRef = useFocusTrap(open);
 
   const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +93,10 @@ export function StatsOverlay({
             <dd>{passiveCps > 0 ? `${formatNumber(passiveCps)} /秒` : "—"}</dd>
           </div>
           <div>
+            <dt>コンボ猶予</dt>
+            <dd>{comboWindowMs}ms</dd>
+          </div>
+          <div>
             <dt>ボーナスタイム</dt>
             <dd>{isBonusActive(state) ? "発動中" : "—"}</dd>
           </div>
@@ -106,7 +112,14 @@ export function StatsOverlay({
               return (
                 <li key={id}>
                   <GameIcon name={id} className="item-icon-svg" />
-                  <span>{item?.name ?? id}</span>
+                  <span className="item-list-body">
+                    <span className="item-list-name">{item?.name ?? id}</span>
+                    {item && (
+                      <span className="item-list-category">
+                        {ITEM_CATEGORY_LABEL[item.category]}
+                      </span>
+                    )}
+                  </span>
                 </li>
               );
             })}

@@ -45,7 +45,8 @@ export function StageRewardSheet({
               </button>
             </div>
             <p className="reward-sheet-desc">
-              3つから1つ選んでください（キー 1〜3 でも選択可）
+              <span className="hint-desktop">3つから1つ選んでください（キー 1〜3 でも選択可）</span>
+              <span className="hint-mobile">3つから1つタップして選んでください</span>
             </p>
             <div className="reward-grid">
               {choices.map((choice, index) => (
