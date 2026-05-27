@@ -12,6 +12,8 @@ export interface ItemDef {
   comboBonus?: number;
   bonusTimeExtendMs?: number;
   spaceHold?: boolean;
+  /** 毎秒の自動クリック数 */
+  passiveCps?: number;
 }
 
 export interface StageGrowth {
@@ -49,6 +51,8 @@ export interface GameState {
   cleared: boolean;
   lastClickAt: number;
   comboStreak: number;
+  /** パッシブ収入の端数ミリ秒 */
+  passiveAccumulatorMs: number;
 }
 
 export interface ClickResult {

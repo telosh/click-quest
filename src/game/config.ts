@@ -23,6 +23,19 @@ export const COMFORT_MESSAGE_MAX_MS = 90_000;
 
 export const SPACE_CLICK_COOLDOWN_MS = 350;
 export const SPACE_HOLD_DELAY_MS = 350;
-export const SPACE_HOLD_INTERVAL_MS = 90;
+export const SPACE_HOLD_INTERVAL_MS = 120;
+
+/** 連打・オートクリック対策: 1秒あたりの処理上限 */
+export const MAX_CLICKS_PER_SECOND = 28;
+/** 1フレームにまとめるクリック数の上限 */
+export const MAX_CLICKS_PER_FRAME = 12;
+/** ポップアップ表示の最小間隔 */
+export const POP_MIN_INTERVAL_MS = 140;
+export const MAX_POPS = 6;
+
+/** パッシブ収入の加算間隔 */
+export const PASSIVE_TICK_MS = 1000;
+/** オフライン収益の上限（30分） */
+export const OFFLINE_PASSIVE_CAP_MS = 30 * 60 * 1000;
 
 export const COMFORT_MUSIC_KEY = "click-quest-comfort-music";
