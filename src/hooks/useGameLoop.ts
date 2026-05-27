@@ -1,12 +1,18 @@
 import { useEffect, useRef } from "react";
-import { useGameStore } from "../game/store";
+import { useGameStore, selectNeedsGameLoop } from "../game/store";
 
 export function useGameLoop() {
   const tick = useGameStore((s) => s.tick);
+  const needsLoop = useGameStore((s) => selectNeedsGameLoop(s.state));
   const lastRef = useRef<number | null>(null);
   const pausedRef = useRef(false);
 
   useEffect(() => {
+    if (!needsLoop) {
+      lastRef.current = null;
+      return;
+    }
+
     const onVisibility = () => {
       pausedRef.current = document.hidden;
       if (!document.hidden) lastRef.current = performance.now();
@@ -31,5 +37,5 @@ export function useGameLoop() {
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [tick]);
+  }, [tick, needsLoop]);
 }
