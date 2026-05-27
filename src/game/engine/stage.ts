@@ -38,6 +38,27 @@ export function processStageUps(state: GameState, previousStageIndex: number): G
   };
 }
 
+export function applyClickGain(
+  state: GameState,
+  gain: number,
+  options?: { updateCombo?: boolean; now?: number },
+): GameState {
+  if (gain <= 0 || isCleared(state)) return state;
+
+  const now = options?.now ?? Date.now();
+  const base = options?.updateCombo ? updateCombo(state, now) : state;
+  const previousStage = base.stageIndex;
+  const totalClicks = Math.min(base.totalClicks + gain, GOAL_CLICKS);
+
+  let next: GameState = {
+    ...base,
+    totalClicks,
+    cleared: totalClicks >= GOAL_CLICKS,
+  };
+
+  return processStageUps(next, previousStage);
+}
+
 export function performClick(state: GameState, now = Date.now()): {
   state: GameState;
   gain: number;
@@ -49,17 +70,36 @@ export function performClick(state: GameState, now = Date.now()): {
 
   const withCombo = updateCombo(state, now);
   const { gain, isLucky } = resolveClickGain(withCombo);
-  const previousStage = withCombo.stageIndex;
-  const totalClicks = Math.min(withCombo.totalClicks + gain, GOAL_CLICKS);
-
-  let next: GameState = {
-    ...withCombo,
-    totalClicks,
-    cleared: totalClicks >= GOAL_CLICKS,
-  };
-
-  next = processStageUps(next, previousStage);
+  const next = applyClickGain(withCombo, gain);
   return { state: next, gain, isLucky };
+}
+
+export function performClickBurst(
+  state: GameState,
+  count: number,
+  now = Date.now(),
+): { state: GameState; gain: number; isLucky: boolean } {
+  if (count <= 0 || isCleared(state)) {
+    return { state, gain: 0, isLucky: false };
+  }
+
+  let next = state;
+  let totalGain = 0;
+  let isLucky = false;
+
+  for (let i = 0; i < count; i += 1) {
+    const result = performClick(next, now);
+    if (result.gain <= 0) break;
+    next = result.state;
+    totalGain += result.gain;
+    isLucky = isLucky || result.isLucky;
+  }
+
+  return { state: next, gain: totalGain, isLucky };
+}
+
+export function applyPassiveGain(state: GameState, gain: number): GameState {
+  return applyClickGain(state, gain, { updateCombo: false });
 }
 
 export function applyReward(state: GameState, reward: RewardChoice): GameState {

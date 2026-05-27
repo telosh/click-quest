@@ -5,6 +5,7 @@ import {
   LUCKY_MULTIPLIER,
   MAX_EQUIPPED_ITEMS,
   MAX_LUCKY_CHANCE,
+  PASSIVE_TICK_MS,
   SAVE_VERSION,
 } from "../config";
 import type { GameState } from "../types";
@@ -24,6 +25,7 @@ export function createInitialState(): GameState {
     cleared: false,
     lastClickAt: 0,
     comboStreak: 0,
+    passiveAccumulatorMs: 0,
   };
 }
 
@@ -153,5 +155,44 @@ export function isInputBlocked(state: GameState): boolean {
 }
 
 export function hasSpaceHoldItem(state: GameState): boolean {
-  return state.equippedItemIds.some((id) => getItem(id)?.spaceHold === true);
+  return hasSpaceHoldEquipped(state.equippedItemIds);
+}
+
+export function hasSpaceHoldEquipped(equippedItemIds: string[]): boolean {
+  return equippedItemIds.some((id) => getItem(id)?.spaceHold === true);
+}
+
+export function getPassiveCps(state: GameState): number {
+  let cps = 0;
+  for (const id of state.equippedItemIds) {
+    cps += getItem(id)?.passiveCps ?? 0;
+  }
+  if (cps <= 0) return 0;
+  return Math.max(1, Math.floor(cps * getBonusMultiplier(state)));
+}
+
+export function needsGameLoop(state: GameState): boolean {
+  return state.bonusTimeRemainingMs > 0 || getPassiveCps(state) > 0;
+}
+
+export function calcPassiveGain(
+  state: GameState,
+  accumulatorMs: number,
+  deltaMs: number,
+): { gain: number; nextAccumulatorMs: number } {
+  const cps = getPassiveCps(state);
+  if (cps <= 0 || isCleared(state)) {
+    return { gain: 0, nextAccumulatorMs: 0 };
+  }
+
+  const total = accumulatorMs + deltaMs;
+  const ticks = Math.floor(total / PASSIVE_TICK_MS);
+  if (ticks <= 0) {
+    return { gain: 0, nextAccumulatorMs: total };
+  }
+
+  return {
+    gain: ticks * cps,
+    nextAccumulatorMs: total % PASSIVE_TICK_MS,
+  };
 }
