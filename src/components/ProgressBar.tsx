@@ -8,9 +8,15 @@ interface ProgressBarProps {
   totalClicks: number;
   stageIndex: number;
   personalBest: number;
+  passiveCps?: number;
 }
 
-export function ProgressBar({ totalClicks, stageIndex, personalBest }: ProgressBarProps) {
+export function ProgressBar({
+  totalClicks,
+  stageIndex,
+  personalBest,
+  passiveCps = 0,
+}: ProgressBarProps) {
   const goalProgress = Math.min(100, (totalClicks / GOAL_CLICKS) * 100);
   const nextThreshold = getNextThreshold(stageIndex);
   const remaining =
@@ -52,6 +58,9 @@ export function ProgressBar({ totalClicks, stageIndex, personalBest }: ProgressB
       <p className="stage-line">
         <LuTarget className="stage-icon" aria-hidden="true" />
         Stage {stageIndex + 1}
+        {passiveCps > 0 && (
+          <span className="passive-cps">自動 +{formatNumber(passiveCps)}/秒</span>
+        )}
         {nextThreshold !== null && (
           <span className="next-milestone">
             次の報酬まで {formatNumber(remaining)}

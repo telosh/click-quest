@@ -3,6 +3,7 @@ import { getItem } from "../game/data/items";
 import {
   getEffectiveLuckyChance,
   getEffectivePower,
+  getPassiveCps,
   isBonusActive,
 } from "../game/engine/click";
 import { formatNumber, formatPercent } from "../game/format";
@@ -31,6 +32,7 @@ export function StatsOverlay({
 }: StatsOverlayProps) {
   const power = getEffectivePower(state);
   const lucky = getEffectiveLuckyChance(state);
+  const passiveCps = getPassiveCps(state);
   const trapRef = useFocusTrap(open);
 
   const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +85,10 @@ export function StatsOverlay({
           <div>
             <dt>Lucky Chance</dt>
             <dd>{formatPercent(lucky)}</dd>
+          </div>
+          <div>
+            <dt>自動クリック</dt>
+            <dd>{passiveCps > 0 ? `${formatNumber(passiveCps)} /秒` : "—"}</dd>
           </div>
           <div>
             <dt>ボーナスタイム</dt>

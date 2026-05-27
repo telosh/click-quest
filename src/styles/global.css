@@ -194,8 +194,17 @@ a.skip-link:focus-visible {
   flex-shrink: 0;
 }
 
+.passive-cps {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .next-milestone {
-  margin-left: 0.75rem;
+  margin-left: auto;
   color: var(--text);
 }
 

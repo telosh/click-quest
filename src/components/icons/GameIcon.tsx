@@ -1,11 +1,15 @@
 import type { IconType } from "react-icons";
 import {
   GiClover,
+  GiFactory,
   GiFingerPrint,
   GiGemPendant,
   GiGloves,
   GiHourglass,
+  GiPerson,
   GiRainbowStar,
+  GiWatch,
+  GiWheat,
 } from "react-icons/gi";
 import { FaBolt, FaCrown, FaStar } from "react-icons/fa";
 import { GiMuscleUp, GiSparkles } from "react-icons/gi";
@@ -15,12 +19,16 @@ import { LuClipboardList, LuKeyboard } from "react-icons/lu";
 const ITEM_ICONS: Record<string, IconType> = {
   ring: GiGemPendant,
   clover: GiClover,
+  pocketWatch: GiWatch,
+  helper: GiPerson,
   spaceKey: LuKeyboard,
   gloves: GiGloves,
   hourglass: GiHourglass,
+  farm: GiWheat,
   rainbow: GiRainbowStar,
   crown: FaCrown,
   star: FaStar,
+  factory: GiFactory,
 };
 
 const REWARD_ICONS: Record<string, IconType> = {
