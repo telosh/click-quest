@@ -1,4 +1,10 @@
-export type RewardKind = "item" | "bonusTime" | "instantBoost" | "powerUp" | "luckyUp";
+export type RewardKind =
+  | "item"
+  | "bonusTime"
+  | "instantBoost"
+  | "powerUp"
+  | "luckyUp"
+  | "pact";
 export type RewardRank = "C" | "B" | "A" | "S";
 
 /** アイテムの成長方針（UI表示・バランス分類用） */
@@ -9,7 +15,8 @@ export type ItemCategory =
   | "combo"
   | "bonus"
   | "input"
-  | "hybrid";
+  | "hybrid"
+  | "pact";
 
 export interface ItemDef {
   id: string;
@@ -18,6 +25,10 @@ export interface ItemDef {
   minStage: number;
   category: ItemCategory;
   powerMult?: number;
+  /** 乗算補正からの減算（0.4 → 合計倍率 -40% 分） */
+  powerMultPenalty?: number;
+  /** ベース Power の上限（1 で常に1扱い） */
+  powerCap?: number;
   luckyBonus?: number;
   luckyMultBonus?: number;
   comboBonus?: number;
@@ -42,6 +53,14 @@ export interface StageGrowth {
   lucky: number;
 }
 
+/** 報酬で付与される永続契約（装備アイテムとは別） */
+export interface PermanentPact {
+  label: string;
+  powerCap: number | null;
+  luckyBonus: number;
+  powerDelta: number;
+}
+
 export interface RewardChoice {
   id: string;
   kind: RewardKind;
@@ -56,6 +75,8 @@ export interface RewardChoice {
   instantGain?: number;
   powerGain?: number;
   luckyGain?: number;
+  /** 契約報酬: ベース Power 上限 */
+  powerCap?: number;
   stageIndex: number;
 }
 
@@ -64,6 +85,8 @@ export interface GameState {
   totalClicks: number;
   stageIndex: number;
   power: number;
+  /** 永続契約（報酬の pact）。null なら未契約 */
+  permanentPact: PermanentPact | null;
   luckyChance: number;
   equippedItemIds: string[];
   bonusTimeRemainingMs: number;
