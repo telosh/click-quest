@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  GOAL_CLICKS,
   MAX_CLICKS_PER_FRAME,
   MAX_CLICKS_PER_SECOND,
   MAX_POPS,
@@ -8,7 +9,9 @@ import {
   POP_MIN_INTERVAL_MS,
   SAVE_KEY,
 } from "./config";
-import type { GameState, PopEvent, RewardChoice } from "./types";
+import type { GameState, PermanentPact, PopEvent, RewardChoice } from "./types";
+import { applyPermanentPact, discardPermanentPact as clearPermanentPact } from "./engine/pact";
+import { getStageIndex } from "./data/stages";
 import { updatePersonalBest, getPersonalBest } from "./engine/best";
 import {
   calcPassiveGain,
@@ -16,6 +19,14 @@ import {
   needsGameLoop,
   tickBonusTime,
 } from "./engine/click";
+import {
+  clearJourney,
+  recordClickBurst,
+  recordRewardChoice,
+  recordSessionStart,
+  recordStageTransitions,
+  syncJourneyBaselineFromLog,
+} from "./engine/journey";
 import {
   loadSaveFromStorage,
   parseSave,
@@ -31,7 +42,6 @@ import {
   resetGame,
 } from "./engine/stage";
 import { playLuckyChime, playMilestoneChime } from "./engine/sound";
-import { getStageIndex } from "./data/stages";
 
 interface GameStore {
   state: GameState;
@@ -41,6 +51,8 @@ interface GameStore {
   personalBest: number;
   stageFlash: number | null;
   lastActivityAt: number;
+  /** 遍歴更新のたびにインクリメント（UI再描画用） */
+  journeyRevision: number;
   hydrate: () => void;
   click: (x: number, y: number) => void;
   selectReward: (rewardId: string) => void;
@@ -52,6 +64,9 @@ interface GameStore {
   clearStageFlash: () => void;
   removePop: (id: number) => void;
   touchActivity: () => void;
+  discardPermanentPact: () => void;
+  debugPatchState: (patch: Partial<GameState>) => void;
+  debugSetPermanentPact: (pact: PermanentPact | null) => void;
 }
 
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
@@ -72,6 +87,15 @@ function schedulePersist(state: GameState) {
   persistTimer = setTimeout(() => {
     writeSaveToStorage(SAVE_KEY, state);
   }, PERSIST_DEBOUNCE_MS);
+}
+
+function bumpJourney(
+  set: (partial: Partial<GameStore>) => void,
+  get: () => GameStore,
+  fn: () => void,
+) {
+  fn();
+  set({ journeyRevision: get().journeyRevision + 1 });
 }
 
 function persistNow(state: GameState) {
@@ -154,6 +178,20 @@ export const useGameStore = create<GameStore>((set, get) => {
       result.isLucky,
     );
 
+    bumpJourney(set, get, () => {
+      if (state.totalClicks === 0 && result.state.totalClicks > 0) {
+        recordSessionStart(result.state);
+      }
+      recordClickBurst({
+        gain: result.gain,
+        inputCount: count,
+        isLucky: result.isLucky,
+        totalClicks: result.state.totalClicks,
+        stageIndex: result.state.stageIndex,
+      });
+      if (stageUp) recordStageTransitions(previousStage, result.state);
+    });
+
     set({
       state: result.state,
       popCounter: popUpdate.popCounter,
@@ -173,6 +211,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     personalBest: 0,
     stageFlash: null,
     lastActivityAt: Date.now(),
+    journeyRevision: 0,
 
     hydrate: () => {
       const loaded = loadSaveFromStorage(SAVE_KEY);
@@ -182,9 +221,15 @@ export const useGameStore = create<GameStore>((set, get) => {
       state = withOffline;
       passiveAccumulatorMs = state.passiveAccumulatorMs;
 
+      syncJourneyBaselineFromLog();
+      if (state.totalClicks > 0) {
+        recordSessionStart(state);
+      }
+
       set({
         state,
         personalBest: getPersonalBest(),
+        journeyRevision: get().journeyRevision + 1,
         toast:
           offlineGain > 0
             ? `おかえりなさい！ 離席中 +${offlineGain.toLocaleString("ja-JP")} クリック`
@@ -225,6 +270,11 @@ export const useGameStore = create<GameStore>((set, get) => {
 
       if (stageUp) playMilestoneChime();
 
+      bumpJourney(set, get, () => {
+        recordRewardChoice(next, reward);
+        if (stageUp) recordStageTransitions(previousStage, next);
+      });
+
       set({
         state: next,
         lastActivityAt: Date.now(),
@@ -257,6 +307,17 @@ export const useGameStore = create<GameStore>((set, get) => {
 
         if (stageUp) playMilestoneChime();
 
+        bumpJourney(set, get, () => {
+          if (passive.gain > 0) {
+            recordClickBurst({
+              gain: passive.gain,
+              totalClicks: merged.totalClicks,
+              stageIndex: merged.stageIndex,
+            });
+          }
+          if (stageUp) recordStageTransitions(previousStage, merged);
+        });
+
         set({
           state: merged,
           personalBest: best,
@@ -273,12 +334,14 @@ export const useGameStore = create<GameStore>((set, get) => {
     reset: () => {
       const next = resetGame();
       passiveAccumulatorMs = 0;
+      clearJourney();
       set({
         state: next,
         pops: [],
         toast: null,
         stageFlash: null,
         lastActivityAt: Date.now(),
+        journeyRevision: get().journeyRevision + 1,
       });
       persistNow(next);
     },
@@ -309,6 +372,32 @@ export const useGameStore = create<GameStore>((set, get) => {
     clearStageFlash: () => set({ stageFlash: null }),
 
     removePop: (id) => set({ pops: get().pops.filter((pop) => pop.id !== id) }),
+
+    discardPermanentPact: () => {
+      const next = clearPermanentPact(get().state);
+      set({ state: next, toast: "永続契約を破棄しました" });
+      schedulePersist(next);
+    },
+
+    debugPatchState: (patch) => {
+      const { state } = get();
+      const totalClicks = patch.totalClicks ?? state.totalClicks;
+      const next: GameState = {
+        ...state,
+        ...patch,
+        totalClicks,
+        stageIndex: getStageIndex(totalClicks),
+        cleared: patch.cleared ?? totalClicks >= GOAL_CLICKS,
+      };
+      set({ state: next });
+      schedulePersist(next);
+    },
+
+    debugSetPermanentPact: (pact) => {
+      const next = applyPermanentPact(get().state, pact);
+      set({ state: next, toast: pact ? `契約を上書き: ${pact.label}` : "契約をクリアしました" });
+      schedulePersist(next);
+    },
   };
 });
 
