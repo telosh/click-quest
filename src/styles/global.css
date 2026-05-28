@@ -385,7 +385,7 @@ a.skip-link:focus-visible {
   right: 0;
   left: auto;
   z-index: 30;
-  width: min(300px, calc(100vw - 2rem));
+  width: min(320px, calc(100vw - 2rem));
   padding: 1rem;
   border: 2px solid var(--text);
   border-radius: var(--radius);
@@ -396,7 +396,7 @@ a.skip-link:focus-visible {
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease;
   overscroll-behavior: contain;
-  max-height: min(58dvh, 480px);
+  max-height: min(72dvh, 560px);
   overflow-y: auto;
 }
 
@@ -437,6 +437,121 @@ a.skip-link:focus-visible {
   margin: 0;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.stats-sub {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.journey-chart {
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.journey-caption {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.journey-empty {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+}
+
+.journey-line-svg,
+.journey-stage-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.journey-plot-bg {
+  fill: #f9fafb;
+}
+
+.journey-line {
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.journey-dot,
+.journey-stage-dot {
+  fill: var(--text);
+}
+
+.journey-edge {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.journey-stage-label {
+  font-size: 9px;
+  fill: var(--muted);
+  font-family: var(--font);
+}
+
+.journey-reward-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.journey-reward-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.45rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.journey-rank {
+  font-weight: 700;
+  font-size: 0.72rem;
+  min-width: 1.1rem;
+  text-align: center;
+}
+
+.journey-rank.rank-S {
+  color: #111;
+}
+.journey-rank.rank-A {
+  color: #374151;
+}
+.journey-rank.rank-B {
+  color: #6b7280;
+}
+.journey-rank.rank-C {
+  color: #9ca3af;
+}
+
+.journey-reward-label {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journey-reward-meta {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.journey-foot {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
 }
 
 .item-list {
@@ -532,10 +647,6 @@ a.skip-link:focus-visible {
   right: max(1rem, env(safe-area-inset-right));
   bottom: max(1rem, env(safe-area-inset-bottom));
   z-index: 45;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 0.55rem;
   pointer-events: none;
 }
 
@@ -544,6 +655,8 @@ a.skip-link:focus-visible {
 }
 
 .reward-tab {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -556,6 +669,24 @@ a.skip-link:focus-visible {
   font-weight: 700;
   letter-spacing: 0.03em;
   box-shadow: 0 8px 24px rgba(17, 17, 17, 0.18);
+}
+
+.reward-tab:not(.open) {
+  animation: reward-tab-nudge 2.4s ease-in-out infinite;
+}
+
+@keyframes reward-tab-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.reward-sheet-root.open .reward-tab {
+  animation: none;
 }
 
 .reward-tab.open {
@@ -579,6 +710,10 @@ a.skip-link:focus-visible {
 }
 
 .reward-sheet-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.55rem);
+  z-index: 1;
   width: min(420px, calc(100vw - 2rem));
   max-height: min(68dvh, 520px);
   padding: 1rem;
@@ -588,6 +723,7 @@ a.skip-link:focus-visible {
   box-shadow: 0 12px 40px rgba(17, 17, 17, 0.12);
   overflow-y: auto;
   overscroll-behavior: contain;
+  transform-origin: bottom right;
 }
 
 .reward-sheet-header {
@@ -985,10 +1121,10 @@ a.skip-link:focus-visible {
     left: max(0.75rem, env(safe-area-inset-left));
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: max(0.75rem, env(safe-area-inset-bottom));
-    align-items: stretch;
   }
 
   .reward-tab {
+    display: flex;
     width: 100%;
     justify-content: center;
     min-height: 48px;
@@ -996,9 +1132,12 @@ a.skip-link:focus-visible {
   }
 
   .reward-sheet-panel {
-    width: 100%;
+    left: 0;
+    right: 0;
+    width: auto;
     max-height: min(72dvh, 560px);
     border-radius: 16px 16px 8px 8px;
+    transform-origin: bottom center;
   }
 
   .reward-grid {
@@ -1016,6 +1155,16 @@ a.skip-link:focus-visible {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: calc(max(4.5rem, env(safe-area-inset-bottom)) + 3.25rem);
     width: auto;
+  }
+
+  .debug-root {
+    top: auto;
+    bottom: calc(max(5rem, env(safe-area-inset-bottom)) + 3.5rem);
+    max-height: min(42dvh, 320px);
+  }
+
+  .debug-panel {
+    width: min(200px, calc(100vw - 3.5rem));
   }
 
   .app.clicking .comfort-corner {
@@ -1046,12 +1195,170 @@ a.skip-link:focus-visible {
   }
 }
 
+/* デバッグ: HUD下・左寄り。ゲームUIと同系の細いスクロールパネル */
+.debug-root {
+  position: fixed;
+  left: max(0.75rem, env(safe-area-inset-left));
+  top: max(7.5rem, calc(env(safe-area-inset-top) + 6.5rem));
+  z-index: 22;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-height: min(calc(100dvh - 10rem), 420px);
+  pointer-events: none;
+}
+
+.debug-root > * {
+  pointer-events: auto;
+}
+
+.debug-toggle {
+  flex-shrink: 0;
+  width: 1.75rem;
+  padding: 0.45rem 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+
+.debug-root.open .debug-toggle {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.debug-panel {
+  width: min(220px, calc(100vw - 4rem));
+  max-height: inherit;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+  font-size: 0.78rem;
+}
+
+.debug-status {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.debug-block {
+  border-top: 1px solid var(--border);
+}
+
+.debug-block:first-of-type {
+  border-top: none;
+}
+
+.debug-block > summary {
+  padding: 0.4rem 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.debug-block > summary::-webkit-details-marker {
+  display: none;
+}
+
+.debug-block > summary::before {
+  content: "› ";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.debug-block[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.debug-block-body {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 0.45rem;
+}
+
+.debug-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.debug-row input {
+  min-width: 0;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.debug-presets {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.debug-preset {
+  flex: 1;
+  padding: 0.2rem 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.debug-preset:hover {
+  background: var(--accent-soft);
+}
+
+.debug-apply {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+.debug-row-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+}
+
+.app.clicking .debug-root {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .progress-fill,
   .stats-panel,
   .stats-sign,
   .hud-main,
-  .reward-card {
+  .reward-card,
+  .reward-tab:not(.open) {
+    transition: none;
+    animation: none;
+  }
+
+  .debug-block > summary::before {
     transition: none;
   }
 }

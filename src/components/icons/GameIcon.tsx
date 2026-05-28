@@ -31,6 +31,10 @@ const ITEM_ICONS: Record<string, IconType> = {
   metronome: TbMetronome,
   helper: GiPerson,
   dice: GiDiceSixFacesFive,
+  thornPact: GiClover,
+  glassMask: GiGemPendant,
+  minimalistSeal: GiWatch,
+  heavyGauntlet: GiGloves,
   spaceKey: LuKeyboard,
   ancientMap: GiScrollUnfurled,
   gloves: GiGloves,
@@ -50,6 +54,7 @@ const REWARD_ICONS: Record<string, IconType> = {
   bonusTime: IoTimerOutline,
   powerUp: GiMuscleUp,
   luckyUp: GiSparkles,
+  pact: GiScrollUnfurled,
 };
 
 interface GameIconProps {

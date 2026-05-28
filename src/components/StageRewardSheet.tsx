@@ -4,6 +4,8 @@ import type { RewardChoice } from "../game/types";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { GameIcon } from "./icons/GameIcon";
 
+const PANEL_EASE = [0.33, 1, 0.68, 1] as const;
+
 interface StageRewardSheetProps {
   stage: number;
   choices: RewardChoice[];
@@ -24,7 +26,21 @@ export function StageRewardSheet({
   if (choices.length === 0) return null;
 
   return (
-    <div className="reward-sheet-root" aria-live="polite">
+    <div className={`reward-sheet-root${open ? " open" : ""}`} aria-live="polite">
+      <motion.button
+        type="button"
+        className={`reward-tab${open ? " open" : ""}`}
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls="reward-sheet-title"
+        layout={false}
+        whileTap={{ scale: 0.98 }}
+      >
+        <LuGift className="reward-tab-icon" aria-hidden="true" />
+        <span>ボーナス GET!</span>
+        <LuChevronDown className={`reward-tab-chevron${open ? " open" : ""}`} aria-hidden="true" />
+      </motion.button>
+
       <AnimatePresence>
         {open && (
           <motion.section
@@ -33,10 +49,10 @@ export function StageRewardSheet({
             role="dialog"
             aria-modal="false"
             aria-labelledby="reward-sheet-title"
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 420, damping: 32 }}
+            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: PANEL_EASE }}
           >
             <div className="reward-sheet-header">
               <h2 id="reward-sheet-title">Stage {stage} 報酬</h2>
@@ -72,25 +88,6 @@ export function StageRewardSheet({
           </motion.section>
         )}
       </AnimatePresence>
-
-      <motion.button
-        type="button"
-        className={`reward-tab${open ? " open" : ""}`}
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-controls="reward-sheet-title"
-        whileTap={{ scale: 0.98 }}
-        animate={open ? { y: 0 } : { y: [0, -3, 0] }}
-        transition={
-          open
-            ? { duration: 0.2 }
-            : { duration: 2.2, repeat: Infinity, ease: "easeInOut" }
-        }
-      >
-        <LuGift className="reward-tab-icon" aria-hidden="true" />
-        <span>ボーナス GET!</span>
-        <LuChevronDown className={`reward-tab-chevron${open ? " open" : ""}`} aria-hidden="true" />
-      </motion.button>
     </div>
   );
 }
