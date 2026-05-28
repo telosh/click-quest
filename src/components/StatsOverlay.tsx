@@ -1,20 +1,26 @@
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import { getItem, ITEM_CATEGORY_LABEL } from "../game/data/items";
 import {
+  getBasePower,
   getComboWindowMs,
   getEffectiveLuckyChance,
   getEffectivePower,
+  getEffectivePowerCap,
   getPassiveCps,
   isBonusActive,
 } from "../game/engine/click";
+import { loadJourney } from "../game/engine/journey";
 import { formatNumber, formatPercent } from "../game/format";
 import type { GameState } from "../game/types";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { ClickJourneyChart } from "./ClickJourneyChart";
 import { GameIcon, SignIcon } from "./icons/GameIcon";
 
 interface StatsOverlayProps {
   open: boolean;
   state: GameState;
+  journeyRevision: number;
   dimmed?: boolean;
   onToggle: () => void;
   onExport: () => void;
@@ -25,13 +31,20 @@ interface StatsOverlayProps {
 export function StatsOverlay({
   open,
   state,
+  journeyRevision,
   dimmed = false,
   onToggle,
   onExport,
   onImport,
   onReset,
 }: StatsOverlayProps) {
+  const journeyLog = useMemo(
+    () => (open ? loadJourney() : { clicks: [], events: [], anchorT: 0, anchorClicks: 0, version: 2 }),
+    [open, journeyRevision],
+  );
   const power = getEffectivePower(state);
+  const basePower = getBasePower(state);
+  const powerCap = getEffectivePowerCap(state);
   const lucky = getEffectiveLuckyChance(state);
   const passiveCps = getPassiveCps(state);
   const comboWindowMs = getComboWindowMs(state.equippedItemIds);
@@ -82,7 +95,15 @@ export function StatsOverlay({
         <dl className="stats-list">
           <div>
             <dt>Power</dt>
-            <dd>{formatNumber(power)}</dd>
+            <dd>
+              {formatNumber(power)}
+              {powerCap !== null && (
+                <span className="stats-sub">
+                  {" "}
+                  (ベース {formatNumber(basePower)} / 上限 {formatNumber(powerCap)})
+                </span>
+              )}
+            </dd>
           </div>
           <div>
             <dt>Lucky Chance</dt>
@@ -95,6 +116,10 @@ export function StatsOverlay({
           <div>
             <dt>コンボ猶予</dt>
             <dd>{comboWindowMs}ms</dd>
+          </div>
+          <div>
+            <dt>永続契約</dt>
+            <dd>{state.permanentPact?.label ?? "—"}</dd>
           </div>
           <div>
             <dt>ボーナスタイム</dt>
@@ -125,6 +150,9 @@ export function StatsOverlay({
             })}
           </ul>
         )}
+
+        <h3>クリック遍歴</h3>
+        <ClickJourneyChart log={journeyLog} />
 
         <div className="stats-actions">
           <button type="button" className="btn ghost" onClick={onExport}>

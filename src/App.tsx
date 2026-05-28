@@ -11,6 +11,8 @@ import { StageFlash } from "./components/StageFlash";
 import { StageRewardSheet } from "./components/StageRewardSheet";
 import { StartupHint } from "./components/StartupHint";
 import { StatsOverlay } from "./components/StatsOverlay";
+import { DebugPanel } from "./components/DebugPanel";
+import { DEBUG_PANEL_ENABLED } from "./game/config/debug";
 import { getPassiveCps, hasSpaceHoldEquipped } from "./game/engine/click";
 import { getCurrentRewardStage, getRewardChoices, useGameStore } from "./game/store";
 import type { GameState } from "./game/types";
@@ -30,6 +32,7 @@ export default function App() {
   const totalClicks = useGameStore((s) => s.state.totalClicks);
   const pendingRewardQueue = useGameStore((s) => s.state.pendingRewardQueue);
   const power = useGameStore((s) => s.state.power);
+  const permanentPact = useGameStore((s) => s.state.permanentPact);
   const luckyChance = useGameStore((s) => s.state.luckyChance);
   const stageIndex = useGameStore((s) => s.state.stageIndex);
   const cleared = useGameStore((s) => s.state.cleared);
@@ -51,6 +54,7 @@ export default function App() {
   const clearStageFlash = useGameStore((s) => s.clearStageFlash);
   const removePop = useGameStore((s) => s.removePop);
   const touchActivity = useGameStore((s) => s.touchActivity);
+  const journeyRevision = useGameStore((s) => s.journeyRevision);
 
   const displayClicks = useThrottledValue(totalClicks);
   const rewardStage = getCurrentRewardStage({ pendingRewardQueue } as GameState);
@@ -66,6 +70,7 @@ export default function App() {
     totalClicks,
     stageIndex,
     power,
+    permanentPact,
     luckyChance,
     equippedItemIds,
     bonusTimeRemainingMs,
@@ -240,6 +245,7 @@ export default function App() {
         <StatsOverlay
           open={statsOpen}
           state={statsState}
+          journeyRevision={journeyRevision}
           dimmed={!isUiIdle}
           onToggle={() => setStatsOpen((v) => !v)}
           onExport={handleExport}
@@ -271,6 +277,8 @@ export default function App() {
 
         <StageFlash stage={stageFlash} onDone={clearStageFlash} />
         <LuckyPopLayer pops={pops} onRemove={removePop} />
+
+        {DEBUG_PANEL_ENABLED && <DebugPanel />}
 
         <AnimatePresence>
           {toast && (
