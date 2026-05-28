@@ -6,6 +6,7 @@ import {
   INSTANT_BOOST_BY_RANK,
   ITEM_RANK,
   LUCKY_UP_BY_RANK,
+  PACT_BY_RANK,
   POWER_UP_BY_RANK,
   REWARD_KIND_LABEL,
   rollRewardRank,
@@ -36,6 +37,7 @@ function buildRewardPool(stageIndex: number, state: GameState): PoolEntry[] {
     { poolKey: "bonusTime", kind: "bonusTime" },
     { poolKey: "powerUp", kind: "powerUp" },
     { poolKey: "luckyUp", kind: "luckyUp" },
+    { poolKey: "pact", kind: "pact" },
   ];
 
   const canEquip = state.equippedItemIds.length < MAX_EQUIPPED_ITEMS;
@@ -129,6 +131,32 @@ function createPowerUpReward(stageIndex: number, rank: RewardRank): RewardChoice
   };
 }
 
+function createPactReward(stageIndex: number, rank: RewardRank): RewardChoice {
+  const spec = PACT_BY_RANK[rank];
+  const parts: string[] = [];
+  if (spec.powerCap !== undefined) {
+    parts.push(`Power を ${spec.powerCap} に固定`);
+  }
+  if (spec.powerDelta !== undefined && spec.powerDelta < 0) {
+    parts.push(`Power ${spec.powerDelta}`);
+  }
+  parts.push(`Lucky Chance +${(spec.lucky * 100).toFixed(0)}%（永続）`);
+
+  return {
+    id: `pact-${rank}-${stageIndex}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    kind: "pact",
+    rank,
+    label: REWARD_KIND_LABEL.pact,
+    variantLabel: spec.variant,
+    description: parts.join(" / "),
+    iconKey: "pact",
+    luckyGain: spec.lucky,
+    powerCap: spec.powerCap,
+    powerGain: spec.powerDelta,
+    stageIndex,
+  };
+}
+
 function createLuckyUpReward(stageIndex: number, rank: RewardRank): RewardChoice {
   const spec = LUCKY_UP_BY_RANK[rank];
   const luckyGain = spec.lucky + Math.min(stageIndex * 0.001, 0.01);
@@ -167,6 +195,8 @@ function materializeReward(
       return createPowerUpReward(stageIndex, rank);
     case "luckyUp":
       return createLuckyUpReward(stageIndex, rank);
+    case "pact":
+      return createPactReward(stageIndex, rank);
   }
 }
 

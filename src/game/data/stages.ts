@@ -21,26 +21,11 @@ export const STAGE_THRESHOLDS = [
   100_000_000,
 ] as const;
 
-export const STAGE_GROWTH: StageGrowth[] = [
-  { power: 1, lucky: 0.03 },
-  { power: 1, lucky: 0.005 },
-  { power: 1, lucky: 0.005 },
-  { power: 2, lucky: 0.01 },
-  { power: 2, lucky: 0.01 },
-  { power: 3, lucky: 0.01 },
-  { power: 3, lucky: 0.015 },
-  { power: 4, lucky: 0.015 },
-  { power: 5, lucky: 0.02 },
-  { power: 6, lucky: 0.02 },
-  { power: 8, lucky: 0.02 },
-  { power: 10, lucky: 0.025 },
-  { power: 12, lucky: 0.025 },
-  { power: 15, lucky: 0.03 },
-  { power: 20, lucky: 0.03 },
-  { power: 25, lucky: 0.035 },
-  { power: 30, lucky: 0.035 },
-  { power: 0, lucky: 0 },
-];
+/** ステージ到達では成長しない（アイテム・報酬のみ） */
+export const STAGE_GROWTH: StageGrowth[] = STAGE_THRESHOLDS.map(() => ({
+  power: 0,
+  lucky: 0,
+}));
 
 export function getStageIndex(totalClicks: number): number {
   let index = 0;

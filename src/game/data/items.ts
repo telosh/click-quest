@@ -8,6 +8,7 @@ export const ITEM_CATEGORY_LABEL: Record<ItemCategory, string> = {
   bonus: "ブースト",
   input: "操作",
   hybrid: "複合",
+  pact: "契約",
 };
 
 export const ITEMS: ItemDef[] = [
@@ -67,6 +68,42 @@ export const ITEMS: ItemDef[] = [
     category: "lucky",
     luckyBonus: 0.02,
     luckyMultBonus: 0.15,
+  },
+  {
+    id: "thornPact",
+    name: "いばらの契約",
+    description: "Power 倍率 -40% / Lucky Chance +25%",
+    minStage: 5,
+    category: "pact",
+    powerMultPenalty: 0.4,
+    luckyBonus: 0.25,
+  },
+  {
+    id: "glassMask",
+    name: "ガラスの仮面",
+    description: "Power を 1 に固定 / Lucky Chance +50%",
+    minStage: 7,
+    category: "pact",
+    powerCap: 1,
+    luckyBonus: 0.5,
+  },
+  {
+    id: "minimalistSeal",
+    name: "ミニマリストの印",
+    description: "Power を 1 に固定 / 毎秒 +4 自動",
+    minStage: 8,
+    category: "pact",
+    powerCap: 1,
+    passiveCps: 4,
+  },
+  {
+    id: "heavyGauntlet",
+    name: "重い籠手",
+    description: "Power 倍率 -30% / 毎秒 +10 自動",
+    minStage: 11,
+    category: "pact",
+    powerMultPenalty: 0.3,
+    passiveCps: 10,
   },
   {
     id: "spaceKey",

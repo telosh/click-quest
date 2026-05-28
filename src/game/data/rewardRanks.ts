@@ -58,6 +58,22 @@ export const LUCKY_UP_BY_RANK: Record<RewardRank, { variant: string; lucky: numb
   S: { variant: "天運", lucky: 0.05 },
 };
 
+/** デメリットとセットの契約報酬 */
+export const PACT_BY_RANK: Record<
+  RewardRank,
+  {
+    variant: string;
+    lucky: number;
+    powerCap?: number;
+    powerDelta?: number;
+  }
+> = {
+  C: { variant: "小さな取引", lucky: 0.15, powerCap: 1 },
+  B: { variant: "幸運の契約", lucky: 0.25, powerCap: 1 },
+  A: { variant: "強欲な誓い", lucky: 0.35, powerCap: 1, powerDelta: -2 },
+  S: { variant: "豪運の代償", lucky: 0.5, powerCap: 1 },
+};
+
 export const ITEM_RANK: Record<string, RewardRank> = {
   ring: "B",
   clover: "B",
@@ -78,6 +94,10 @@ export const ITEM_RANK: Record<string, RewardRank> = {
   amplifier: "A",
   star: "A",
   factory: "S",
+  thornPact: "B",
+  glassMask: "A",
+  minimalistSeal: "A",
+  heavyGauntlet: "A",
 };
 
 export const REWARD_KIND_LABEL: Record<RewardKind, string> = {
@@ -86,4 +106,5 @@ export const REWARD_KIND_LABEL: Record<RewardKind, string> = {
   bonusTime: "ボーナスタイム",
   powerUp: "Power 強化",
   luckyUp: "Lucky 強化",
+  pact: "契約",
 };
