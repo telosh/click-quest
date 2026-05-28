@@ -1,7 +1,7 @@
 import { GOAL_CLICKS } from "../game/config";
 import { getStageIndex } from "../game/data/stages";
 import { createInitialState } from "../game/engine/click";
-import { parseSave, serializeSave } from "../game/engine/save";
+import { serializeSave } from "../game/engine/save";
 import { applyPassiveGain, performClickBurst } from "../game/engine/stage";
 import type { GameState } from "../game/types";
 import { useGameStore } from "../game/store";
