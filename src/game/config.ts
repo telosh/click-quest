@@ -1,6 +1,12 @@
 export const SAVE_VERSION = 1;
 export const SAVE_KEY = "click-quest-v1";
 
+export const JOURNEY_KEY = "click-quest-journey-v1";
+/** クリックティックの最大件数（古い分は間引き） */
+export const JOURNEY_MAX_CLICKS = 1_500;
+export const JOURNEY_MAX_EVENTS = 120;
+export const JOURNEY_PERSIST_DEBOUNCE_MS = 450;
+
 export const GOAL_CLICKS = 100_000_000;
 
 export const MAX_LUCKY_CHANCE = 0.5;
