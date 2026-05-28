@@ -10,6 +10,9 @@ import {
   resolveClickGain,
   updateCombo,
 } from "./click";
+import { applyPermanentPact, pactFromReward } from "./pact";
+
+export { discardPermanentPact } from "./pact";
 
 export function applyStageGrowth(state: GameState, stageIndex: number): GameState {
   const growth = getStageGrowth(stageIndex);
@@ -133,6 +136,10 @@ export function applyReward(state: GameState, reward: RewardChoice): GameState {
       ...next,
       luckyChance: Math.min(MAX_LUCKY_CHANCE, next.luckyChance + reward.luckyGain),
     };
+  }
+
+  if (reward.kind === "pact") {
+    next = applyPermanentPact(next, pactFromReward(reward));
   }
 
   next.pendingRewardQueue = next.pendingRewardQueue.filter(

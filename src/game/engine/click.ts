@@ -10,6 +10,7 @@ import {
 } from "../config";
 import type { GameState } from "../types";
 import { getItem } from "../data/items";
+import { getPermanentLuckyBonus, getPermanentPowerCap } from "./pact";
 
 export function createInitialState(): GameState {
   return {
@@ -17,6 +18,7 @@ export function createInitialState(): GameState {
     totalClicks: 0,
     stageIndex: 0,
     power: 1,
+    permanentPact: null,
     luckyChance: 0.03,
     equippedItemIds: [],
     bonusTimeRemainingMs: 0,
@@ -34,8 +36,26 @@ export function getItemPowerMultiplier(equippedItemIds: string[]): number {
   for (const id of equippedItemIds) {
     const item = getItem(id);
     if (item?.powerMult) mult += item.powerMult;
+    if (item?.powerMultPenalty) mult -= item.powerMultPenalty;
   }
-  return mult;
+  return Math.max(0.05, mult);
+}
+
+export function getEffectivePowerCap(state: GameState): number | null {
+  let cap = getPermanentPowerCap(state);
+  for (const id of state.equippedItemIds) {
+    const itemCap = getItem(id)?.powerCap;
+    if (itemCap !== undefined) {
+      cap = cap === null ? itemCap : Math.min(cap, itemCap);
+    }
+  }
+  return cap;
+}
+
+export function getBasePower(state: GameState): number {
+  const cap = getEffectivePowerCap(state);
+  const power = cap === null ? state.power : Math.min(state.power, cap);
+  return Math.max(1, power);
 }
 
 export function getItemLuckyBonus(equippedItemIds: string[]): number {
@@ -71,13 +91,17 @@ export function getComboBonus(state: GameState): number {
 export function getEffectiveLuckyChance(state: GameState): number {
   return Math.min(
     MAX_LUCKY_CHANCE,
-    state.luckyChance + getItemLuckyBonus(state.equippedItemIds),
+    state.luckyChance +
+      getPermanentLuckyBonus(state) +
+      getItemLuckyBonus(state.equippedItemIds),
   );
 }
 
 export function getEffectivePower(state: GameState): number {
   const combo = getComboBonus(state);
-  return state.power * getItemPowerMultiplier(state.equippedItemIds) * (1 + combo);
+  return (
+    getBasePower(state) * getItemPowerMultiplier(state.equippedItemIds) * (1 + combo)
+  );
 }
 
 export function getLuckyMultiplier(state: GameState): number {

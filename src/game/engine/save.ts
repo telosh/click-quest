@@ -2,6 +2,8 @@ import { SAVE_VERSION } from "../config";
 import type { GameState, RewardChoice } from "../types";
 import { getStageIndex } from "../data/stages";
 import { createInitialState } from "./click";
+import { migrateLegacyPowerCap } from "./pact";
+import type { PermanentPact } from "../types";
 
 const TIMESTAMP_SUFFIX = ":ts";
 
@@ -31,6 +33,7 @@ export function serializeSave(state: GameState): string {
     totalClicks: state.totalClicks,
     stageIndex: state.stageIndex,
     power: state.power,
+    permanentPact: state.permanentPact,
     luckyChance: state.luckyChance,
     equippedItemIds: state.equippedItemIds,
     bonusTimeRemainingMs: state.bonusTimeRemainingMs,
@@ -51,13 +54,27 @@ export function parseSave(raw: string): GameState | null {
 
     const base = createInitialState();
     const totalClicks = data.totalClicks ?? 0;
+    const legacy = data as Partial<GameState> & { powerCap?: number | null };
+    let permanentPact: PermanentPact | null =
+      legacy.permanentPact && typeof legacy.permanentPact === "object"
+        ? legacy.permanentPact
+        : null;
+    let luckyChance = data.luckyChance ?? base.luckyChance;
+
+    if (!permanentPact && legacy.powerCap != null) {
+      const migrated = migrateLegacyPowerCap(legacy.powerCap, luckyChance);
+      permanentPact = migrated.permanentPact;
+      luckyChance = migrated.luckyChance;
+    }
+
     return {
       ...base,
       saveVersion: data.saveVersion ?? SAVE_VERSION,
       totalClicks,
       stageIndex: getStageIndex(totalClicks),
       power: data.power ?? base.power,
-      luckyChance: data.luckyChance ?? base.luckyChance,
+      permanentPact,
+      luckyChance,
       equippedItemIds: Array.isArray(data.equippedItemIds) ? data.equippedItemIds : [],
       bonusTimeRemainingMs: data.bonusTimeRemainingMs ?? 0,
       bonusTimeMultiplier: data.bonusTimeMultiplier ?? base.bonusTimeMultiplier,
